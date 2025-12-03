@@ -1,0 +1,117 @@
+MODULE
+
+BYTE ARRAY line(40)
+
+INCLUDE "D2:IOFUN3.ACT"
+
+
+INT FUNC ReadLine(BYTE chan)
+
+  BYTE ch, len      
+
+  len = 0
+
+  DO
+    ch = FGetD(chan)
+    ;Print("Read byte:")
+    ;PrintIE(ch)
+    IF ch < 0 OR ch = 136 THEN
+      IF len = 0 THEN
+        RETURN (len)
+      FI
+      line(0) = len
+      RETURN (len)
+    FI
+
+    IF ch = 155 THEN
+      ;PrintE("Hit EOL")
+      line(0) = len
+      RETURN (len)
+    FI
+
+    IF len < 39 THEN
+      len==+1
+      line(len) = ch
+    FI
+  OD
+RETURN (len)
+
+
+PROC Main()
+  BYTE ARRAY infile="D2:ATINPUT.TXT"
+
+  BYTE chan, len, dir
+  INT pos, clicks, i, instcount
+  CARD zeroCount
+  INT rc
+
+  pos=50
+  zeroCount=0
+  instcount=0       
+  chan=2
+
+  Close(2) ;
+  IF FOpen(chan, 4, 0, infile)>127
+  THEN
+    PrintE("FOpen error.")
+          
+  FI
+
+  DO
+    rc = ReadLine(chan)
+    instcount==+1
+    IF rc > 0 THEN
+
+      len = line(0)
+      IF len > 0 THEN
+        dir = line(1)
+
+        clicks = 0
+        FOR i = 2 TO len 
+        DO
+          clicks = clicks * 10 + (line(i) - '0)
+        OD
+        ;Print("Total distance is ")
+        ;PrintIE(clicks)
+
+        IF dir = 'L THEN
+          FOR i = 1 to clicks
+          DO
+            pos==-1
+            IF pos = 0 THEN
+              zeroCount==+1
+            FI
+            IF pos < 0 THEN
+              pos==+100
+            FI
+          OD
+        ELSEIF dir = 'R THEN
+          ;PrintE("Entering the R turn loop")
+          FOR i = 1 to clicks
+          DO
+            pos==+1
+            IF pos = 100 THEN
+              zeroCount==+1
+            FI
+            IF pos >= 100 THEN
+              pos==-100
+            FI
+          OD
+        FI
+        ;Print("Current position:")
+        ;PrintIE(pos)
+
+      FI
+    ELSE
+      EXIT
+    FI     
+  OD
+
+  FClose(chan)
+
+  Print("Password (times at 0):")
+  PrintIE(zeroCount)
+  Print("Total instructions:")
+  PrintIE(instcount)
+RETURN
+                
